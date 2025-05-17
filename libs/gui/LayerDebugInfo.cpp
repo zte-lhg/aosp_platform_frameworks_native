@@ -28,7 +28,7 @@ using android::base::StringAppendF;
 #define RETURN_ON_ERROR(X) do {status_t res = (X); if (res != NO_ERROR) return res;} while(false)
 
 namespace android {
-
+// layer debugInfo writeToParcel and readFromParcel
 status_t LayerDebugInfo::writeToParcel(Parcel* parcel) const {
     RETURN_ON_ERROR(parcel->writeCString(mName.c_str()));
     RETURN_ON_ERROR(parcel->writeCString(mParentName.c_str()));
