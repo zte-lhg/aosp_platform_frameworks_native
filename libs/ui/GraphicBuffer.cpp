@@ -45,22 +45,27 @@ static uint64_t getUniqueId() {
     return id;
 }
 
+// ANativeWindowBuffer can just static_cast to GraphicsBuffer
 sp<GraphicBuffer> GraphicBuffer::from(ANativeWindowBuffer* anwb) {
     return static_cast<GraphicBuffer *>(anwb);
 }
 
+// AHardwareBuffer can just reinterept_cast to GraphicBuffer
 GraphicBuffer* GraphicBuffer::fromAHardwareBuffer(AHardwareBuffer* buffer) {
     return reinterpret_cast<GraphicBuffer*>(buffer);
 }
 
+// we can just cast from AHardwareBuffer to GraphicsBuffer
 GraphicBuffer const* GraphicBuffer::fromAHardwareBuffer(AHardwareBuffer const* buffer) {
     return reinterpret_cast<GraphicBuffer const*>(buffer);
 }
 
+// reinterpret_cast AHardwareBuffer to AHardwareBuffer
 AHardwareBuffer* GraphicBuffer::toAHardwareBuffer() {
     return reinterpret_cast<AHardwareBuffer*>(this);
 }
 
+// cast AHardwareBuffer to AHardwareBuffer
 AHardwareBuffer const* GraphicBuffer::toAHardwareBuffer() const {
     return reinterpret_cast<AHardwareBuffer const*>(this);
 }
@@ -198,6 +203,7 @@ bool GraphicBuffer::needsReallocation(uint32_t inWidth, uint32_t inHeight,
     return false;
 }
 
+// init GraphicBuffer with size
 status_t GraphicBuffer::initWithSize(uint32_t inWidth, uint32_t inHeight,
         PixelFormat inFormat, uint32_t inLayerCount, uint64_t inUsage,
         std::string requestorName)
@@ -299,6 +305,7 @@ status_t GraphicBuffer::lockYCbCr(uint32_t inUsage, const Rect& rect,
                 width, height);
         return BAD_VALUE;
     }
+    // use getBufferMapper to lockYCbCr to lock the buffer
     status_t res = getBufferMapper().lockYCbCr(handle, inUsage, rect, ycbcr);
     return res;
 }
@@ -391,7 +398,7 @@ size_t GraphicBuffer::getFdCount() const {
 #endif
     return static_cast<size_t>(handle ? mTransportNumFds : 0);
 }
-
+// graphicsBuffer flatten
 status_t GraphicBuffer::flatten(void*& buffer, size_t& size, int*& fds, size_t& count) const {
 #ifndef LIBUI_IN_VNDK
     if (mBufferHubBuffer != nullptr) {
