@@ -45,6 +45,7 @@ namespace android {
 //  SurfaceControl
 // ============================================================================
 
+// surface 由 surfaceComposerCLient 及 IBinder handle 以及 IGraphicBufferProducer 构造
 SurfaceControl::SurfaceControl(
         const sp<SurfaceComposerClient>& client,
         const sp<IBinder>& handle,
@@ -66,9 +67,9 @@ SurfaceControl::~SurfaceControl()
     // Avoid reparenting the server-side surface to null if we are not the owner of it,
     // meaning that we retrieved it from another process.
     if (mClient != nullptr && mHandle != nullptr && mOwned) {
-        SurfaceComposerClient::doDropReferenceTransaction(mHandle, mClient->getClient());
+        SurfaceComposerClient::doDropReferenceTransaction(mHandle, mClient->getClient()); // doDropReferenceTransaction
     }
-    release();
+    release();  // release the surfaceControl
 }
 
 void SurfaceControl::destroy()
@@ -86,12 +87,12 @@ void SurfaceControl::release()
     mClient.clear();
     mHandle.clear();
     mGraphicBufferProducer.clear();
-    IPCThreadState::self()->flushCommands();
+    IPCThreadState::self()->flushCommands();   // flush the server side command
 }
 
 void SurfaceControl::disconnect() {
     if (mGraphicBufferProducer != nullptr) {
-        mGraphicBufferProducer->disconnect(
+        mGraphicBufferProducer->disconnect(   // disconnect the surfaceControl from the bufferqueue
                 BufferQueueCore::CURRENTLY_CONNECTED_API);
     }
 }
@@ -101,14 +102,14 @@ bool SurfaceControl::isSameSurface(
 {
     if (lhs == nullptr || rhs == nullptr)
         return false;
-    return lhs->mHandle == rhs->mHandle;
+    return lhs->mHandle == rhs->mHandle;   // if the handle is the same, so the surfaceControl is the same
 }
 
 status_t SurfaceControl::clearLayerFrameStats() const {
     status_t err = validate();
     if (err != NO_ERROR) return err;
     const sp<SurfaceComposerClient>& client(mClient);
-    return client->clearLayerFrameStats(mHandle);
+    return client->clearLayerFrameStats(mHandle);  // clearLayerFrameStats
 }
 
 status_t SurfaceControl::getLayerFrameStats(FrameStats* outStats) const {
@@ -118,6 +119,7 @@ status_t SurfaceControl::getLayerFrameStats(FrameStats* outStats) const {
     return client->getLayerFrameStats(mHandle, outStats);
 }
 
+// judge if the surfaceControl is valid or not
 status_t SurfaceControl::validate() const
 {
     if (mHandle==nullptr || mClient==nullptr) {
@@ -127,7 +129,7 @@ status_t SurfaceControl::validate() const
     }
     return NO_ERROR;
 }
-
+// write the surfaceControl to Parcel
 status_t SurfaceControl::writeSurfaceToParcel(
         const sp<SurfaceControl>& control, Parcel* parcel)
 {
@@ -144,7 +146,7 @@ sp<Surface> SurfaceControl::generateSurfaceLocked() const
     // producerControlledByApp value doesn't matter; using false.
     mSurfaceData = new Surface(mGraphicBufferProducer, false);
 
-    return mSurfaceData;
+    return mSurfaceData;   // generate a new Surface from the Surface
 }
 
 sp<Surface> SurfaceControl::getSurface() const
@@ -159,7 +161,7 @@ sp<Surface> SurfaceControl::getSurface() const
 sp<Surface> SurfaceControl::createSurface() const
 {
     Mutex::Autolock _l(mLock);
-    return generateSurfaceLocked();
+    return generateSurfaceLocked();   // create a Surface
 }
 
 sp<IBinder> SurfaceControl::getHandle() const
@@ -189,7 +191,7 @@ void SurfaceControl::writeToParcel(Parcel* parcel)
 sp<SurfaceControl> SurfaceControl::readFromParcel(Parcel* parcel)
 {
     sp<IBinder> client = parcel->readStrongBinder();
-    sp<IBinder> handle = parcel->readStrongBinder();
+    sp<IBinder> handle = parcel->readStrongBinder();   // read StrongBinder,
     if (client == nullptr || handle == nullptr)
     {
         ALOGE("Invalid parcel");
@@ -199,7 +201,7 @@ sp<SurfaceControl> SurfaceControl::readFromParcel(Parcel* parcel)
     parcel->readNullableStrongBinder(&gbp);
 
     // We aren't the original owner of the surface.
-    return new SurfaceControl(new SurfaceComposerClient(
+    return new SurfaceControl(new SurfaceComposerClient(  // create a new SurfaceControl from Parcel
                     interface_cast<ISurfaceComposerClient>(client)),
             handle.get(), interface_cast<IGraphicBufferProducer>(gbp), false /* owned */);
 }
