@@ -155,7 +155,7 @@ void TransactionCompletedListener::startListeningLocked() {
     ProcessState::self()->startThreadPool();
     mListening = true;
 }
-
+// add transactionCompletedListener SurfaceFLinger finish the transaction and call the callback
 CallbackId TransactionCompletedListener::addCallbackFunction(
         const TransactionCompletedCallback& callbackFunction,
         const std::unordered_set<sp<SurfaceControl>, SurfaceComposerClient::SCHash>&
@@ -175,6 +175,7 @@ CallbackId TransactionCompletedListener::addCallbackFunction(
     return callbackId;
 }
 
+// add SurfaceControlToCallback
 void TransactionCompletedListener::addSurfaceControlToCallbacks(
         const sp<SurfaceControl>& surfaceControl,
         const std::unordered_set<CallbackId>& callbackIds) {
@@ -899,6 +900,7 @@ SurfaceComposerClient::Transaction& SurfaceComposerClient::Transaction::setCrop(
     return *this;
 }
 
+// setFrame
 SurfaceComposerClient::Transaction& SurfaceComposerClient::Transaction::setFrame(
         const sp<SurfaceControl>& sc, const Rect& frame) {
     layer_state_t* s = getLayerState(sc);
@@ -1313,6 +1315,7 @@ void SurfaceComposerClient::dispose() {
     mStatus = NO_INIT;
 }
 
+// use SurfaceComposerCLient the createSurface
 sp<SurfaceControl> SurfaceComposerClient::createSurface(const String8& name, uint32_t w, uint32_t h,
                                                         PixelFormat format, uint32_t flags,
                                                         SurfaceControl* parent,
@@ -1598,7 +1601,7 @@ status_t ScreenshotClient::captureLayers(const sp<IBinder>& layerHandle,
                                     sourceCrop, {}, frameScale, false /* childrenOnly */);
     return ret;
 }
-
+// captureChildLayers 创建子 Layers
 status_t ScreenshotClient::captureChildLayers(
         const sp<IBinder>& layerHandle, const ui::Dataspace reqDataSpace,
         const ui::PixelFormat reqPixelFormat, Rect sourceCrop,
