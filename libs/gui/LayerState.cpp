@@ -26,6 +26,7 @@
 
 namespace android {
 
+// write the layer_state_t to the out Parcel
 status_t layer_state_t::write(Parcel& output) const
 {
     output.writeStrongBinder(surface);
@@ -98,6 +99,7 @@ status_t layer_state_t::write(Parcel& output) const
     return NO_ERROR;
 }
 
+// read input to create a layer_state_t
 status_t layer_state_t::read(const Parcel& input)
 {
     surface = input.readStrongBinder();
