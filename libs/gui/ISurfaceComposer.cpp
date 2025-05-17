@@ -63,7 +63,7 @@ public:
         remote()->transact(BnSurfaceComposer::CREATE_CONNECTION, data, &reply);
         return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
     }
-
+    // setTransactionState and use transaction to call the surfaceFlinger to capture screen
     virtual void setTransactionState(const Vector<ComposerState>& state,
                                      const Vector<DisplayState>& displays, uint32_t flags,
                                      const sp<IBinder>& applyToken,
@@ -987,6 +987,7 @@ IMPLEMENT_META_INTERFACE(SurfaceComposer, "android.ui.ISurfaceComposer");
 
 // ----------------------------------------------------------------------
 
+// define BnSurfaceComposer onTransaction for server side to action
 status_t BnSurfaceComposer::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
