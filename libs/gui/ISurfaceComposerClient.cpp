@@ -39,6 +39,7 @@ enum class Tag : uint32_t {
 
 } // Anonymous namespace
 
+// definition the ISurfaceComposerClient and define the server and client interface for binder to call async
 class BpSurfaceComposerClient : public SafeBpInterface<ISurfaceComposerClient> {
 public:
     explicit BpSurfaceComposerClient(const sp<IBinder>& impl)
