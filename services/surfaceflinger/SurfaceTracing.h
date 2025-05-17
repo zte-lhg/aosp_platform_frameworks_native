@@ -39,6 +39,7 @@ constexpr auto operator""_MB(unsigned long long const num) {
 /*
  * SurfaceTracing records layer states during surface flinging.
  */
+// SurfaceTracing records layer states during surfaceFlinging
 class SurfaceTracing {
 public:
     explicit SurfaceTracing(SurfaceFlinger& flinger);
