@@ -168,7 +168,7 @@ public:
     int32_t mComposerSequenceId = 0;
 };
 
-class SurfaceFlinger : public BnSurfaceComposer,
+class SurfaceFlinger : public BnSurfaceComposer,   // 继承作为 BnSurfaceComposer 的 Bn Service 端
                        public PriorityDumper,
                        public ClientCache::ErasedRecipient,
                        private IBinder::DeathRecipient,
