@@ -101,6 +101,7 @@ void ConsumerBase::freeBufferLocked(int slotIndex) {
     mSlots[slotIndex].mFrameNumber = 0;
 }
 
+// onFrameAvailable 当 bufferQueue 后端 queuebuffer 通知消费者 onFrameable，通过 SurfaceFlinger acquireBUffer
 void ConsumerBase::onFrameAvailable(const BufferItem& item) {
     CB_LOGV("onFrameAvailable");
 
