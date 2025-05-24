@@ -98,13 +98,13 @@ sp<SurfaceFlinger> createSurfaceFlinger() {
                                               std::string requestorName) override {
             return new GraphicBuffer(width, height, format, layerCount, usage, requestorName);
         }
-
+        // 工厂方法创建 BufferQueue
         void createBufferQueue(sp<IGraphicBufferProducer>* outProducer,
                                sp<IGraphicBufferConsumer>* outConsumer,
                                bool consumerIsSurfaceFlinger) override {
             BufferQueue::createBufferQueue(outProducer, outConsumer, consumerIsSurfaceFlinger);
         }
-
+        // createNativeWindowSurface 创建 NativeWindowSurface
         std::unique_ptr<surfaceflinger::NativeWindowSurface> createNativeWindowSurface(
                 const sp<IGraphicBufferProducer>& producer) override {
             return surfaceflinger::impl::createNativeWindowSurface(producer);
@@ -113,7 +113,7 @@ sp<SurfaceFlinger> createSurfaceFlinger() {
         std::unique_ptr<compositionengine::CompositionEngine> createCompositionEngine() override {
             return compositionengine::impl::createCompositionEngine();
         }
-
+        // createContainLayer 创建 ContainerLayer 创建 容器 layer
         sp<ContainerLayer> createContainerLayer(const LayerCreationArgs& args) override {
             return new ContainerLayer(args);
         }
