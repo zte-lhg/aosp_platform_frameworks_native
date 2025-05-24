@@ -91,7 +91,7 @@ int main(int, char**) {
     // instantiate surfaceflinger
     sp<SurfaceFlinger> flinger = surfaceflinger::createSurfaceFlinger();
 
-    setpriority(PRIO_PROCESS, 0, PRIORITY_URGENT_DISPLAY);
+    setpriority(PRIO_PROCESS, 0, PRIORITY_URGENT_DISPLAY);  // 设置 surfaceFlinger 的线程优先级为 URGENT_DISPLAY
 
     set_sched_policy(0, SP_FOREGROUND);
 
