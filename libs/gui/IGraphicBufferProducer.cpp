@@ -85,6 +85,7 @@ public:
 
     ~BpGraphicBufferProducer() override;
 
+    // GraphicsBufferProducer buffer 生产者
     virtual status_t requestBuffer(int bufferIdx, sp<GraphicBuffer>* buf) {
         Parcel data, reply;
         data.writeInterfaceToken(IGraphicBufferProducer::getInterfaceDescriptor());
@@ -105,7 +106,7 @@ public:
         result = reply.readInt32();
         return result;
     }
-
+    // 设置 MaxDequeueBufferCount buffer 数量
     virtual status_t setMaxDequeuedBufferCount(int maxDequeuedBuffers) {
         Parcel data, reply;
         data.writeInterfaceToken(
@@ -717,6 +718,7 @@ status_t IGraphicBufferProducer::exportToParcel(const sp<IGraphicBufferProducer>
     }
 }
 
+// 通过 aidl 创建 IGraphicsBufferProducer
 /* static */
 sp<IGraphicBufferProducer> IGraphicBufferProducer::createFromParcel(const Parcel* parcel) {
     uint32_t outMagic = 0;
