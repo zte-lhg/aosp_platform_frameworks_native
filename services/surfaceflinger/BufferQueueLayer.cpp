@@ -88,7 +88,7 @@ void BufferQueueLayer::setDefaultBufferSize(uint32_t w, uint32_t h) {
 int32_t BufferQueueLayer::getQueuedFrameCount() const {
     return mQueuedFrames;
 }
-
+// 判断是否需要显示
 bool BufferQueueLayer::shouldPresentNow(nsecs_t expectedPresentTime) const {
     if (getSidebandStreamChanged() || getAutoRefresh()) {
         return true;
@@ -374,6 +374,7 @@ status_t BufferQueueLayer::updateTexImage(bool& recomputeVisibleRegions, nsecs_t
     return NO_ERROR;
 }
 
+// 更新 activeBuffer
 status_t BufferQueueLayer::updateActiveBuffer() {
     // update the active buffer
     mActiveBuffer = mConsumer->getCurrentBuffer(&mActiveBufferSlot, &mActiveBufferFence);
@@ -439,6 +440,7 @@ void BufferQueueLayer::fakeVsync() {
     releasePendingBuffer(systemTime());
 }
 
+// 当有 FrameAvailable 更新，通知 SF 合成
 void BufferQueueLayer::onFrameAvailable(const BufferItem& item) {
     ATRACE_CALL();
     // Add this buffer from our internal queue tracker
