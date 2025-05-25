@@ -26,11 +26,13 @@ ContainerLayer::ContainerLayer(const LayerCreationArgs& args) : Layer(args) {}
 
 ContainerLayer::~ContainerLayer() = default;
 
+// 容器 Layer prepareClientLayer 返回 false
 bool ContainerLayer::prepareClientLayer(const RenderArea&, const Region&, bool, Region&, const bool,
                                         renderengine::LayerSettings&) {
     return false;
 }
 
+// isVisible 为 false
 bool ContainerLayer::isVisible() const {
     return false;
 }
@@ -38,7 +40,7 @@ bool ContainerLayer::isVisible() const {
 bool ContainerLayer::canReceiveInput() const {
     return !isHiddenByPolicy();
 }
-
+// setPreframeData 为空
 void ContainerLayer::setPerFrameData(const sp<const DisplayDevice>&, const ui::Transform&,
                                      const Rect&, int32_t, const ui::Dataspace) {}
 
