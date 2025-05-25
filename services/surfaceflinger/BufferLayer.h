@@ -183,7 +183,7 @@ private:
 
     // main thread.
     bool mBufferLatched{false}; // TODO: Use mActiveBuffer?
-
+    // BufferStateLayer 返回一个 Invalid_rect，如果 layer 没有拥有一个显示的 frame
     // BufferStateLayers can return Rect::INVALID_RECT if the layer does not have a display frame
     // and its parent layer is not bounded
     Rect getBufferSize(const State& s) const override;
