@@ -140,6 +140,7 @@ namespace {
 #pragma clang diagnostic push
 #pragma clang diagnostic error "-Wswitch-enum"
 
+// 是否是广域色模式
 bool isWideColorMode(const ColorMode colorMode) {
     switch (colorMode) {
         case ColorMode::DISPLAY_P3:
@@ -162,6 +163,7 @@ bool isWideColorMode(const ColorMode colorMode) {
     return false;
 }
 
+// 是否是 Hdr 颜色模式
 bool isHdrColorMode(const ColorMode colorMode) {
     switch (colorMode) {
         case ColorMode::BT2100_PQ:
@@ -184,6 +186,7 @@ bool isHdrColorMode(const ColorMode colorMode) {
     return false;
 }
 
+// 返回方位旋转角度
 ui::Transform::orientation_flags fromSurfaceComposerRotation(ISurfaceComposer::Rotation rotation) {
     switch (rotation) {
         case ISurfaceComposer::eRotateNone:
@@ -230,7 +233,7 @@ const String16 sDump("android.permission.DUMP");
 
 // ---------------------------------------------------------------------------
 int64_t SurfaceFlinger::dispSyncPresentTimeOffset;
-bool SurfaceFlinger::useHwcForRgbToYuv;
+bool SurfaceFlinger::useHwcForRgbToYuv;  // 使用 hwc 进行 Rgb 到 Yuv 的转换
 uint64_t SurfaceFlinger::maxVirtualDisplaySize;
 bool SurfaceFlinger::hasSyncFramework;
 bool SurfaceFlinger::useVrFlinger;
@@ -423,6 +426,7 @@ void SurfaceFlinger::binderDied(const wp<IBinder>& /* who */)
     startBootAnim();
 }
 
+// 初始化 SurfaceComposerClient
 static sp<ISurfaceComposerClient> initClient(const sp<Client>& client) {
     status_t err = client->initCheck();
     if (err == NO_ERROR) {
@@ -431,6 +435,7 @@ static sp<ISurfaceComposerClient> initClient(const sp<Client>& client) {
     return nullptr;
 }
 
+// 创建 SurfaceComposerClient 客户端
 sp<ISurfaceComposerClient> SurfaceFlinger::createConnection() {
     return initClient(new Client(this));
 }
@@ -528,7 +533,7 @@ renderengine::RenderEngine& SurfaceFlinger::getRenderEngine() const {
 compositionengine::CompositionEngine& SurfaceFlinger::getCompositionEngine() const {
     return *mCompositionEngine.get();
 }
-
+// bootFinished 启动结束
 void SurfaceFlinger::bootFinished()
 {
     if (mStartPropertySetThread->join() != NO_ERROR) {
@@ -616,7 +621,7 @@ void SurfaceFlinger::init() {
     ALOGI(  "SurfaceFlinger's main thread ready to run. "
             "Initializing graphics H/W...");
 
-    ALOGI("Phase offset NS: %" PRId64 "", mPhaseOffsets->getCurrentAppOffset());
+    ALOGI("Phase offset NS: %" PRId64 "", mPhaseOffsets->getCurrentAppOffset());  // app vsync offset
 
     Mutex::Autolock _l(mStateLock);
     // start the EventThread
@@ -765,7 +770,7 @@ void SurfaceFlinger::readPersistentProperties() {
     property_get("persist.sys.sf.color_mode", value, "0");
     mForceColorMode = static_cast<ColorMode>(atoi(value));
 }
-
+// 开始显示 BootAnim 开机动画
 void SurfaceFlinger::startBootAnim() {
     // Start boot animation service by setting a property mailbox
     // if property setting thread is already running, Start() will be just a NOP
@@ -1471,7 +1476,7 @@ nsecs_t SurfaceFlinger::getVsyncPeriod() const {
     const auto config = getHwComposer().getActiveConfig(*displayId);
     return config ? config->getVsyncPeriod() : 0;
 }
-
+// SF 收到 Vsync 信号
 void SurfaceFlinger::onVsyncReceived(int32_t sequenceId, hwc2_display_t hwcDisplayId,
                                      int64_t timestamp) {
     ATRACE_NAME("SF onVsync");
@@ -1531,6 +1536,7 @@ void SurfaceFlinger::setRefreshRateTo(RefreshRateType refreshRate, Scheduler::Co
     setDesiredActiveConfig({refreshRate, desiredConfigId, event});
 }
 
+// 收到 HotplugReceived 信号
 void SurfaceFlinger::onHotplugReceived(int32_t sequenceId, hwc2_display_t hwcDisplayId,
                                        HWC2::Connection connection) {
     ALOGV("%s(%d, %" PRIu64 ", %s)", __FUNCTION__, sequenceId, hwcDisplayId,
@@ -1884,7 +1890,7 @@ void SurfaceFlinger::calculateWorkingSet() {
                 // TODO: Do this once per compositionengine::CompositionLayer.
                 layer->getLayerFE().latchCompositionState(layer->getLayer().editState().frontEnd,
                                                           true);
-
+// 计算更新 geometry state 状态
                 // Recalculate the geometry state of the output layer.
                 layer->updateCompositionState(true);
 
@@ -3066,7 +3072,7 @@ void SurfaceFlinger::latchAndReleaseBuffer(const sp<Layer>& layer) {
     }
     layer->releasePendingBuffer(systemTime());
 }
-
+// commitTransaction 提交 Transaction
 void SurfaceFlinger::commitTransaction()
 {
     if (!mLayersPendingRemoval.isEmpty()) {
@@ -3149,6 +3155,7 @@ void SurfaceFlinger::commitOffscreenLayers() {
     }
 }
 
+// 计算 VisibleRegions 可见区域
 void SurfaceFlinger::computeVisibleRegions(const sp<const DisplayDevice>& displayDevice,
                                            Region& outDirtyRegion, Region& outOpaqueRegion) {
     ATRACE_CALL();
@@ -3546,7 +3553,7 @@ bool SurfaceFlinger::doComposeSurfaces(const sp<DisplayDevice>& displayDevice,
         const bool expensiveRenderingExpected =
                 clientCompositionDisplay.outputDataspace == Dataspace::DISPLAY_P3;
         if (expensiveRenderingExpected && displayId) {
-            mPowerAdvisor.setExpensiveRenderingExpected(*displayId, true);
+            mPowerAdvisor.setExpensiveRenderingExpected(*displayId, true);  // set gpu freqency for high performance
         }
         if (!debugRegion.isEmpty()) {
             Region::const_iterator it = debugRegion.begin();
@@ -3561,6 +3568,7 @@ bool SurfaceFlinger::doComposeSurfaces(const sp<DisplayDevice>& displayDevice,
                 clientCompositionLayers.push_back(layerSettings);
             }
         }
+        // 执行硬件合成
         renderEngine.drawLayers(clientCompositionDisplay, clientCompositionLayers,
                                 buf->getNativeBuffer(), /*useFramebufferCache=*/true, std::move(fd),
                                 readyFence);
@@ -3575,6 +3583,7 @@ void SurfaceFlinger::drawWormhole(const Region& region) const {
     engine.fillRegionWithColor(region, 0, 0, 0, 0);
 }
 
+// 增加 clientLayer 层
 status_t SurfaceFlinger::addClientLayer(const sp<Client>& client, const sp<IBinder>& handle,
                                         const sp<IGraphicBufferProducer>& gbc, const sp<Layer>& lbc,
                                         const sp<IBinder>& parentHandle,
@@ -3650,6 +3659,7 @@ uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags,
     return old;
 }
 
+// flushTransactionQueues 刷新 Transaction 队列
 bool SurfaceFlinger::flushTransactionQueues() {
     // to prevent onHandleDestroyed from being called while the lock is held,
     // we must keep a copy of the transactions (specifically the composer
@@ -4273,7 +4283,7 @@ status_t SurfaceFlinger::createLayer(const String8& name, const sp<Client>& clie
             primaryDisplayOnly = true;
         }
     }
-
+    // 根据 flags 创建不同的 buffer layer
     switch (flags & ISurfaceComposerClient::eFXSurfaceMask) {
         case ISurfaceComposerClient::eFXSurfaceBufferQueue:
             result = createBufferQueueLayer(client, uniqueName, w, h, flags, std::move(metadata),
@@ -4295,7 +4305,7 @@ status_t SurfaceFlinger::createLayer(const String8& name, const sp<Client>& clie
             result = createColorLayer(client, uniqueName, w, h, flags, std::move(metadata), handle,
                                       &layer);
             break;
-        case ISurfaceComposerClient::eFXSurfaceContainer:
+        case ISurfaceComposerClient::eFXSurfaceContainer:   // 创建 SurfaceContainer 容器 layer
             // check if buffer size is set for container layer.
             if (w > 0 || h > 0) {
                 ALOGE("createLayer() failed, w or h cannot be set for container layer (w=%d, h=%d)",
@@ -4371,7 +4381,7 @@ status_t SurfaceFlinger::createBufferQueueLayer(const sp<Client>& client, const 
         format = PIXEL_FORMAT_RGBA_8888;
         break;
     case PIXEL_FORMAT_OPAQUE:
-        format = PIXEL_FORMAT_RGBX_8888;
+        format = PIXEL_FORMAT_RGBX_8888;  // 初始化 SUrface format 格式
         break;
     }
 
@@ -4392,7 +4402,7 @@ status_t SurfaceFlinger::createBufferStateLayer(const sp<Client>& client, const 
                                                 uint32_t w, uint32_t h, uint32_t flags,
                                                 LayerMetadata metadata, sp<IBinder>* handle,
                                                 sp<Layer>* outLayer) {
-    sp<BufferStateLayer> layer = getFactory().createBufferStateLayer(
+    sp<BufferStateLayer> layer = getFactory().createBufferStateLayer(  // 创建 bufferState layer
             LayerCreationArgs(this, client, name, w, h, flags, std::move(metadata)));
     *handle = layer->getHandle();
     *outLayer = layer;
@@ -5679,6 +5689,7 @@ status_t SurfaceFlinger::captureScreen(const sp<IBinder>& displayToken,
 
     auto traverseLayers = std::bind(&SurfaceFlinger::traverseLayersInDisplay, this, display,
                                     std::placeholders::_1);
+    // 调用 captureScreenCommon 进行截屏操作
     return captureScreenCommon(renderArea, traverseLayers, outBuffer, reqPixelFormat,
                                useIdentityTransform, outCapturedSecureLayers);
 }
@@ -5928,7 +5939,7 @@ status_t SurfaceFlinger::captureScreenCommon(RenderArea& renderArea,
     // TODO(b/116112787) Make buffer usage a parameter.
     const uint32_t usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN |
             GRALLOC_USAGE_HW_RENDER | GRALLOC_USAGE_HW_TEXTURE;
-    *outBuffer =
+    *outBuffer =  // 创建一个 GraphicsBuffer 
             getFactory().createGraphicBuffer(renderArea.getReqWidth(), renderArea.getReqHeight(),
                                              static_cast<android_pixel_format>(reqPixelFormat), 1,
                                              usage, "screenshot");
@@ -5969,6 +5980,7 @@ status_t SurfaceFlinger::captureScreenCommon(RenderArea& renderArea,
         {
             Mutex::Autolock _l(mStateLock);
             renderArea.render([&] {
+                // captureScreenImplLocked 截屏操作
                 result = captureScreenImplLocked(renderArea, traverseLayers, buffer.get(),
                                                  useIdentityTransform, forSystem, &fd,
                                                  outCapturedSecureLayers);
@@ -6088,7 +6100,7 @@ void SurfaceFlinger::renderScreenImplLocked(const RenderArea& renderArea,
 
     Region clearRegion = Region::INVALID_REGION;
     traverseLayers([&](Layer* layer) {
-        renderengine::LayerSettings layerSettings;
+        renderengine::LayerSettings layerSettings;  // prepareCLientLayer
         bool prepared = layer->prepareClientLayer(renderArea, useIdentityTransform, clearRegion,
                                                   false, layerSettings);
         if (prepared) {
@@ -6101,7 +6113,7 @@ void SurfaceFlinger::renderScreenImplLocked(const RenderArea& renderArea,
     // there is no need for synchronization with the GPU.
     base::unique_fd bufferFence;
     base::unique_fd drawFence;
-    getRenderEngine().useProtectedContext(false);
+    getRenderEngine().useProtectedContext(false);  // 采用 GPU 合成 layer 输出到 buffer
     getRenderEngine().drawLayers(clientCompositionDisplay, clientCompositionLayers, buffer,
                                  /*useFramebufferCache=*/false, std::move(bufferFence), &drawFence);
 
