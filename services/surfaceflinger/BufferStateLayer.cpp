@@ -142,7 +142,7 @@ bool BufferStateLayer::applyPendingStates(Layer::State* stateToCommit) {
 Rect BufferStateLayer::getCrop(const Layer::State& /*s*/) const {
     return Rect::INVALID_RECT;
 }
-
+// 设置 transform
 bool BufferStateLayer::setTransform(uint32_t transform) {
     if (mCurrentState.transform == transform) return false;
     mCurrentState.transform = transform;
@@ -160,6 +160,7 @@ bool BufferStateLayer::setTransformToDisplayInverse(bool transformToDisplayInver
     return true;
 }
 
+// 设置 Crop 区域
 bool BufferStateLayer::setCrop(const Rect& crop) {
     Rect c = crop;
     if (c.left < 0) {
@@ -215,6 +216,7 @@ bool BufferStateLayer::setFrame(const Rect& frame) {
     return true;
 }
 
+// 设置 buffer
 bool BufferStateLayer::setBuffer(const sp<GraphicBuffer>& buffer, nsecs_t postTime,
                                  nsecs_t desiredPresentTime, const client_cache_t& clientCacheId) {
     if (mCurrentState.buffer) {
@@ -279,6 +281,7 @@ bool BufferStateLayer::setApi(int32_t api) {
     return true;
 }
 
+// 设置 sidebandStream 流
 bool BufferStateLayer::setSidebandStream(const sp<NativeHandle>& sidebandStream) {
     if (mCurrentState.sidebandStream == sidebandStream) return false;
     mCurrentState.sidebandStream = sidebandStream;
@@ -504,6 +507,7 @@ status_t BufferStateLayer::bindTextureImage() {
     return engine.bindExternalTextureBuffer(mTextureName, s.buffer, s.acquireFence);
 }
 
+// updateTexImage 纹理上传
 status_t BufferStateLayer::updateTexImage(bool& /*recomputeVisibleRegions*/, nsecs_t latchTime) {
     const State& s(getDrawingState());
 
