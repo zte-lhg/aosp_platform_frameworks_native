@@ -52,9 +52,10 @@ bool ColorLayer::prepareClientLayer(const RenderArea& renderArea, const Region& 
                                     bool useIdentityTransform, Region& clearRegion,
                                     const bool supportProtectedContent,
                                     renderengine::LayerSettings& layer) {
+    // prepareClientLayer 准备 client layer
     Layer::prepareClientLayer(renderArea, clip, useIdentityTransform, clearRegion,
                               supportProtectedContent, layer);
-    half4 color(getColor());
+    half4 color(getColor());   // setColor 设置颜色
     half3 solidColor(color.r, color.g, color.b);
     layer.source.solidColor = solidColor;
     return true;
@@ -111,7 +112,7 @@ void ColorLayer::setPerFrameData(const sp<const DisplayDevice>& display,
         visible.dump(LOG_TAG);
     }
     outputLayer->editState().visibleRegion = visible;
-
+    // 设置合成类型
     setCompositionType(display, Hwc2::IComposerClient::Composition::SOLID_COLOR);
 
     const ui::Dataspace dataspace =
@@ -126,7 +127,7 @@ void ColorLayer::setPerFrameData(const sp<const DisplayDevice>& display,
     auto& layerCompositionState = getCompositionLayer()->editState().frontEnd;
     layerCompositionState.dataspace = mCurrentDataSpace;
 
-    half4 color = getColor();
+    half4 color = getColor();  // hwcLayer setColor 设置颜色
     error = hwcLayer->setColor({static_cast<uint8_t>(std::round(255.0f * color.r)),
                                 static_cast<uint8_t>(std::round(255.0f * color.g)),
                                 static_cast<uint8_t>(std::round(255.0f * color.b)), 255});
@@ -153,7 +154,7 @@ void ColorLayer::setPerFrameData(const sp<const DisplayDevice>& display,
     }
     layerCompositionState.colorTransform = getColorTransform();
 
-    error = hwcLayer->setSurfaceDamage(surfaceDamageRegion);
+    error = hwcLayer->setSurfaceDamage(surfaceDamageRegion);  // 设置 surface famage 区域
     if (error != HWC2::Error::None) {
         ALOGE("[%s] Failed to set surface damage: %s (%d)", mName.string(),
               to_string(error).c_str(), static_cast<int32_t>(error));
