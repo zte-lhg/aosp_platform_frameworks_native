@@ -121,7 +121,7 @@ public:
 };
 ANDROID_SINGLETON_STATIC_INSTANCE(DefaultComposerClient);
 
-
+// getDefault 获取默认的 SurfaceComposerClient
 sp<SurfaceComposerClient> SurfaceComposerClient::getDefault() {
     return DefaultComposerClient::getComposerClient();
 }
@@ -155,6 +155,7 @@ void TransactionCompletedListener::startListeningLocked() {
     ProcessState::self()->startThreadPool();
     mListening = true;
 }
+
 // add transactionCompletedListener SurfaceFLinger finish the transaction and call the callback
 CallbackId TransactionCompletedListener::addCallbackFunction(
         const TransactionCompletedCallback& callbackFunction,
@@ -169,7 +170,7 @@ CallbackId TransactionCompletedListener::addCallbackFunction(
     auto& callbackSurfaceControls = mCallbacks[callbackId].surfaceControls;
 
     for (const auto& surfaceControl : surfaceControls) {
-        callbackSurfaceControls[surfaceControl->getHandle()] = surfaceControl;
+        callbackSurfaceControls[surfaceControl->getHandle()] = surfaceControl;  // assign surfaceControl to callbackSurfaceControls
     }
 
     return callbackId;
@@ -180,7 +181,7 @@ void TransactionCompletedListener::addSurfaceControlToCallbacks(
         const sp<SurfaceControl>& surfaceControl,
         const std::unordered_set<CallbackId>& callbackIds) {
     std::lock_guard<std::mutex> lock(mMutex);
-
+    // ass SurfaceControlToCallbacks 将 surfaceControl 关联起来
     for (auto callbackId : callbackIds) {
         mCallbacks[callbackId].surfaceControls.emplace(std::piecewise_construct,
                                                        std::forward_as_tuple(
@@ -224,7 +225,7 @@ void TransactionCompletedListener::onTransactionCompleted(ListenerStats listener
                                                  surfaceStats.acquireTime,
                                                  surfaceStats.previousReleaseFence);
             }
-
+            // callbackFunction
             callbackFunction(transactionStats.latchTime, transactionStats.presentFence,
                              surfaceControlStats);
             mCallbacks.erase(callbackId);
@@ -263,7 +264,7 @@ public:
             evictLeastRecentlyUsedBuffer();
         }
 
-        buffer->addDeathCallback(bufferCacheCallback, nullptr);
+        buffer->addDeathCallback(bufferCacheCallback, nullptr);  // addDeathCallback
 
         mBuffers[buffer->getId()] = getCounter();
         return buffer->getId();
@@ -396,7 +397,7 @@ void SurfaceComposerClient::doUncacheBufferTransaction(uint64_t cacheId) {
     uncacheBuffer.token = BufferCache::getInstance().getToken();
     uncacheBuffer.id = cacheId;
 
-    sp<IBinder> applyToken = IInterface::asBinder(TransactionCompletedListener::getIInstance());
+    sp<IBinder> applyToken = IInterface::asBinder(TransactionCompletedListener::getIInstance());  // IInterface binder 引用
     sf->setTransactionState({}, {}, 0, applyToken, {}, -1, uncacheBuffer, {});
 }
 
@@ -558,13 +559,14 @@ layer_state_t* SurfaceComposerClient::Transaction::getLayerState(const sp<Surfac
     return &(mComposerStates[sc].state);
 }
 
+// 通过 SurfaceControl 向 SF 端提交一个 Transaction，等待 Transaction replay 返回，Transaction 返回会调用 callback，callback 需要关联一个 surfaceControl
 void SurfaceComposerClient::Transaction::registerSurfaceControlForCallback(
         const sp<SurfaceControl>& sc) {
     auto& callbackInfo = mListenerCallbacks[TransactionCompletedListener::getIInstance()];
     callbackInfo.surfaceControls.insert(sc);
 
     TransactionCompletedListener::getInstance()
-            ->addSurfaceControlToCallbacks(sc, callbackInfo.callbackIds);
+            ->addSurfaceControlToCallbacks(sc, callbackInfo.callbackIds);   // addSurfaceControlToCallbacks
 }
 
 SurfaceComposerClient::Transaction& SurfaceComposerClient::Transaction::setPosition(
