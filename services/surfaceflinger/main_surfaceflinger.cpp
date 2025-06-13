@@ -34,7 +34,7 @@
 #include "SurfaceFlingerProperties.h"
 
 using namespace android;
-
+// start graphics allocator service
 static status_t startGraphicsAllocatorService() {
     using android::hardware::configstore::getBool;
     using android::hardware::configstore::V1_0::ISurfaceFlingerConfigs;
@@ -57,7 +57,7 @@ static status_t startGraphicsAllocatorService() {
 
     return OK;
 }
-
+// start displayService
 static status_t startDisplayService() {
     using android::frameworks::displayservice::V1_0::implementation::DisplayService;
     using android::frameworks::displayservice::V1_0::IDisplayService;
@@ -90,7 +90,7 @@ int main(int, char**) {
 
     // instantiate surfaceflinger
     sp<SurfaceFlinger> flinger = surfaceflinger::createSurfaceFlinger();
-
+    // start surfaceFlinger and set the SP to FOREGROUND
     setpriority(PRIO_PROCESS, 0, PRIORITY_URGENT_DISPLAY);  // 设置 surfaceFlinger 的线程优先级为 URGENT_DISPLAY
 
     set_sched_policy(0, SP_FOREGROUND);
