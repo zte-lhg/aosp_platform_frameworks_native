@@ -95,7 +95,7 @@ status_t TransactionCompletedThread::addCallback(const sp<ITransactionCompletedL
     transactionStatsDeque.emplace_back(callbackIds);
     return NO_ERROR;
 }
-
+// registerPendingCallbackHandle and findTransactionStats, and then addPendingTransaction
 status_t TransactionCompletedThread::registerPendingCallbackHandle(
         const sp<CallbackHandle>& handle) {
     std::lock_guard lock(mMutex);
